@@ -250,6 +250,11 @@
                         `;
                     };
 
+                    const tableHtml = `${createTable('All Time', 'leaderboardAllTime', creators)}
+                            ${createTable('Last Month', 'leaderboardLastMonth', creators)}
+                            ${createTable('Last Week', 'leaderboardLastWeek', creators)}`;
+                    if (tableHtml.trim() === '') return (window.location += '&mode=creator');
+
                     return `
                             <p>Gifter Stats for <a href="https://throne.com/${username}">${username}</a></p>
                             ${createTable('All Time', 'leaderboardAllTime', creators)}
@@ -257,7 +262,10 @@
                             ${createTable('Last Week', 'leaderboardLastWeek', creators)}
                         `;
                 };
-                app.innerHTML = render(creators);
+
+                if (mode !== 'creator') {
+                    app.innerHTML = render(creators);
+                }
                 if (mode === 'creator' && creators[0].boards.leaderboardAllTime.earnings > 0) {
                     const renderCreatorTable = (title, slug, creator) => {
                         const gifters = creator.data[slug]
