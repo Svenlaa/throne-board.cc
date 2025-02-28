@@ -222,13 +222,13 @@
                                         .map(
                                             (creator) => `
                                                 <tr>
-                                                    <td><span>${
-                                                        creator.displayName
-                                                    }</span> <a href="https://throne.com/${
+                                                    <td><a href="https://throne.com/${creator.username}">${
+                                                creator.displayName
+                                            }</a> <a href="?name=${
                                                 creator.username
                                             }" style="font-size: 0.75em; --color: var(--stone-700)">${
                                                 creator.username
-                                            }</span></td>
+                                            }</a></td>
                                                     <td>$${creator.boards[slug].earnings.toFixed(2)}</td>
                                                     <td>$${creator.boards[slug].contribution.amount.toFixed(2)} (${(
                                                 creator.boards[slug].contribution.percentage * 100
