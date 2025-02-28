@@ -7,14 +7,10 @@
         <link rel="stylesheet" href="https://svenlaa.com/style.css" />
         <link rel="shortcut icon" href="https://svenlaa.com/favicon.ico" type="image/x-icon" />
         <style>
-            h2 {
-                margin-top: 2em;
-            }
-
             table {
                 width: 100%;
                 border-collapse: collapse;
-                margin-top: 1em;
+                margin: 1em 0 2em 0;
             }
 
             th,
@@ -229,13 +225,11 @@
             };
 
             const success = await init();
-            if (!success) {
-                app.innerHTML += `<form>
-                    <label for="name">Enter your throne username</label>
+            app.innerHTML += `<form>
+                    <label for="name">Enter ${success ? 'a different ' : 'your'} throne username</label>
                     <input type="text" name="name" />
                     <button type="submit">Submit</button>
                 </form>`;
-            }
         </script>
     </body>
 </html>
