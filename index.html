@@ -112,12 +112,6 @@
                     return nameFromQuery;
                 }
 
-                const newName = prompt("Enter your throne username that's visible in the url");
-                if (newName && newName.length > 0) {
-                    window.location.search = `?name=${newName}`;
-                    return newName;
-                }
-
                 return null;
             };
 
