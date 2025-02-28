@@ -128,11 +128,11 @@
             };
 
             const init = async () => {
-                const displayName = getName();
-                if (!displayName) return false;
+                const username = getName();
+                if (!username) return false;
 
-                app.innerHTML += `<p>Got name: ${displayName}</p>`;
-                const userId = await getUserId(displayName);
+                app.innerHTML += `<p>Got name: ${username}</p>`;
+                const userId = await getUserId(username);
                 if (!userId) {
                     app.innerHTML += `<p>Could not find user</p>`;
                     return false;
@@ -143,10 +143,10 @@
                 const following = await getFollowedCreators(userId);
                 app.innerHTML += `<p>Found ${following.length} creators</p>`;
                 if (following.length === 0) {
-                    app.innerHTML += `<p>We can't display any data</p>`;
-                    return false;
+                    app.innerHTML += `<p>Let's assume you're one</p>`;
+                    following.push(userId);
                 }
-                let creators = await getUsersByIds(following);
+                let creators = await getUsersByIds(following.length ? following : [userId]);
 
                 creators = await Promise.all(
                     (creators = creators.map(async (creator) => {
@@ -163,7 +163,7 @@
 
                 const calculateFromLeaderboard = (leaderboard) => {
                     const totalCents = leaderboard.reduce((sum, item) => sum + item.totalAmountSpentUSD, 0);
-                    const me = leaderboard.find((item) => item.gifterUsername.toLowerCase() === displayName);
+                    const me = leaderboard.find((item) => item.gifterUsername.toLowerCase() === username);
                     if (!me) {
                         return {
                             earnings: totalCents / 100,
@@ -186,23 +186,28 @@
 
                 creators = creators
                     .map((creator) => {
-                        const alltime = creator.data.leaderboardAllTime;
-                        const month = creator.data.leaderboardLastMonth;
-                        const week = creator.data.leaderboardLastWeek;
+                        const leaderboardAllTime = creator.data.leaderboardAllTime;
+                        const leaderboardLastMonth = creator.data.leaderboardLastMonth;
+                        const leaderboardLastWeek = creator.data.leaderboardLastWeek;
 
                         return {
                             ...creator,
                             boards: {
-                                alltime: calculateFromLeaderboard(alltime),
-                                week: calculateFromLeaderboard(week),
-                                month: calculateFromLeaderboard(month),
+                                leaderboardAllTime: calculateFromLeaderboard(leaderboardAllTime),
+                                leaderboardLastMonth: calculateFromLeaderboard(leaderboardLastMonth),
+                                leaderboardLastWeek: calculateFromLeaderboard(leaderboardLastWeek),
                             },
                         };
                     })
-                    .sort((a, b) => b.boards.alltime.earnings - a.boards.alltime.earnings);
+                    .sort((a, b) => b.boards.leaderboardAllTime.earnings - a.boards.leaderboardAllTime.earnings);
 
                 const render = (creators) => {
-                    const createTable = (title, slug, data) => `
+                    if (creators.reduce((sum, creator) => sum + creator.boards.leaderboardAllTime.earnings, 0) === 0) {
+                        return `<p>Nothing at all</p>`;
+                    }
+                    const createTable = (title, slug, data) => {
+                        if (!data.length) return '';
+                        return `
                             <h2>${title}</h2>
                             <table>
                                 <thead>
@@ -234,14 +239,58 @@
                                 </tbody>
                             </table>
                         `;
+                    };
 
                     return `
-                            ${createTable('All Time', 'alltime', creators)}
-                            ${createTable('Last Month', 'month', creators)}
-                            ${createTable('Last Week', 'week', creators)}
+                            <p>Gifter Stats for <a href="https://throne.com/${username}">${username}</a></p>
+                            ${createTable('All Time', 'leaderboardAllTime', creators)}
+                            ${createTable('Last Month', 'leaderboardLastMonth', creators)}
+                            ${createTable('Last Week', 'leaderboardLastWeek', creators)}
                         `;
                 };
                 app.innerHTML = render(creators);
+                if (creators.length === 1 && creators[0].boards.leaderboardAllTime.earnings > 0) {
+                    const renderCreatorTable = (title, slug, creator) => {
+                        const gifters = creator.data[slug]
+                            .sort((a, b) => b.totalAmountSpentUSD - a.totalAmountSpentUSD)
+                            .slice(0, 5);
+                        if (!gifters.length) return '';
+                        return `
+                            <h2>${title}</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Gifter</th>
+                                        <th>Amount (USD)</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${gifters
+                                        .map(
+                                            (gifter) => `
+                                                <tr>
+                                                    <td><span>${gifter.gifterUsername}</span></td>
+                                                    <td>$${(gifter.totalAmountSpentUSD / 100).toFixed(2)}</td>
+                                                    <td>${(
+                                                        gifter.totalAmountSpentUSD / creator.boards[slug].earnings
+                                                    ).toFixed(1)}%</td>
+                                                </tr>`
+                                        )
+                                        .join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    };
+                    app.innerHTML = `
+                        <p>Creator Stats for <a href="https://throne.com/${creators[0].username}">${
+                        creators[0].displayName
+                    }</a></p>
+                        ${renderCreatorTable('All Time', 'leaderboardAllTime', creators[0])}
+                        ${renderCreatorTable('Last Month', 'leaderboardLastMonth', creators[0])}
+                        ${renderCreatorTable('Last Week', 'leaderboardLastWeek', creators[0])}
+                    `;
+                }
                 return true;
             };
 
