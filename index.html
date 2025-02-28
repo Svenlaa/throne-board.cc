@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Throne Board</title>
+        <link rel="stylesheet" href="https://svenlaa.com/style.css" />
+        <link rel="shortcut icon" href="https://svenlaa.com/favicon.ico" type="image/x-icon" />
+        <style>
+            h2 {
+                margin-top: 2em;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 1em;
+            }
+
+            th,
+            td {
+                padding: 0.5em;
+                text-align: left;
+                border-bottom: 1px solid var(--stone-200);
+            }
+
+            th {
+                background-color: var(--stone-200);
+            }
+
+            tr:hover {
+                background-color: var(--stone-100);
+            }
+        </style>
+    </head>
+    <body>
+        <h1>
+            <a style="--color: var(--stone-950); text-decoration: none" href="https://github.com/Svenlaa/throne-board"
+                >Throne Board</a
+            >
+        </h1>
+        <div id="app"></div>
+        <script type="module">
+            const app = document.getElementById('app');
+
+            const getUsersByIds = async (userIds) => {
+                const res = await fetch(
+                    `https://firestore.googleapis.com/v1/projects/onlywish-9d17b/databases/(default)/documents:batchGet`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            documents: userIds.map(
+                                (userId) => `projects/onlywish-9d17b/databases/(default)/documents/creators/${userId}`
+                            ),
+                        }),
+                    }
+                );
+                const json = await res.json();
+                return json.map((doc) => ({
+                    id: doc.found.name.split('/').pop(),
+                    displayName: doc.found.fields.displayName.stringValue,
+                    username: doc.found.fields.username.stringValue,
+                }));
+            };
+
+            const getFollowedCreators = async (userId) => {
+                const res = await fetch(
+                    `https://firestore.googleapis.com/v1/projects/onlywish-9d17b/databases/(default)/documents/creators/${userId}/following`
+                );
+                const json = await res.json();
+                if (!json || !json.documents) {
+                    return [];
+                }
+                return json.documents.map((doc) => doc.fields.followedUserId.stringValue);
+            };
+
+            const getUserId = async (displayName) => {
+                const res = await fetch(
+                    `https://firestore.googleapis.com/v1/projects/onlywish-9d17b/databases/(default)/documents:runQuery`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            structuredQuery: {
+                                from: [{ collectionId: 'creators' }],
+                                where: {
+                                    fieldFilter: {
+                                        field: { fieldPath: 'username' },
+                                        op: 'EQUAL',
+                                        value: { stringValue: displayName },
+                                    },
+                                },
+                            },
+                        }),
+                    }
+                );
+                const json = await res.json();
+                if (!json || !json[0] || !json[0].document) {
+                    localStorage.removeItem('name');
+                    return null;
+                }
+                const documentName = json[0].document.name;
+                const userId = documentName.split('/').pop();
+                return userId;
+            };
+
+            const getName = () => {
+                const params = new URLSearchParams(window.location.search);
+                const nameFromQuery = params.get('name');
+                if (nameFromQuery && nameFromQuery.length > 0) {
+                    return nameFromQuery;
+                }
+
+                const newName = prompt("Enter your throne username that's visible in the url");
+                if (newName && newName.length > 0) {
+                    window.location.search = `?name=${newName}`;
+                    return newName;
+                }
+
+                return null;
+            };
+
+            const init = async () => {
+                const displayName = getName();
+                if (!displayName) return false;
+
+                app.innerHTML += `<p>Got name: ${displayName}</p>`;
+                const userId = await getUserId(displayName);
+                if (!userId) {
+                    app.innerHTML += `<p>Could not find user</p>`;
+                    return false;
+                }
+                app.innerHTML += `<p>Got User ID: ${userId}</p>`;
+
+                app.innerHTML += `<p>Getting followed creators</p>`;
+                const following = await getFollowedCreators(userId);
+                app.innerHTML += `<p>Found ${following.length} creators</p>`;
+                if (following.length === 0) {
+                    app.innerHTML += `<p>We can't display any data</p>`;
+                    return false;
+                }
+                let creators = await getUsersByIds(following);
+
+                creators = await Promise.all(
+                    (creators = creators.map(async (creator) => {
+                        const res = await fetch(
+                            `https://api-leaderboard-ijywe5kgva-uc.a.run.app/v1/leaderboard/${creator.id}`
+                        );
+                        const data = await res.json();
+                        return {
+                            ...creator,
+                            data,
+                        };
+                    }))
+                );
+
+                const calculateFromLeaderboard = (leaderboard) => {
+                    const totalCents = leaderboard.reduce((sum, item) => sum + item.totalAmountSpentUSD, 0);
+                    const me = leaderboard.find((item) => item.gifterUsername.toLowerCase() === displayName);
+                    const contribution = me && totalCents ? me.totalAmountSpentUSD / totalCents : 0;
+
+                    return {
+                        earnings: totalCents / 100,
+                        contribution,
+                    };
+                };
+
+                creators = creators
+                    .map((creator) => {
+                        const alltime = creator.data.leaderboardAllTime;
+                        const month = creator.data.leaderboardLastMonth;
+                        const week = creator.data.leaderboardLastWeek;
+
+                        return {
+                            ...creator,
+                            boards: {
+                                alltime: calculateFromLeaderboard(alltime),
+                                week: calculateFromLeaderboard(week),
+                                month: calculateFromLeaderboard(month),
+                            },
+                        };
+                    })
+                    .sort((a, b) => b.boards.alltime.earnings - a.boards.alltime.earnings);
+
+                console.log(creators);
+                const render = (creators) => {
+                    const createTable = (title, slug, data) => `
+                            <h2>${title}</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Creator</th>
+                                        <th>Earnings</th>
+                                        <th>Your Contribution</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data
+                                        .map(
+                                            (creator) => `
+                                                <tr>
+                                                    <td><span>${
+                                                        creator.displayName
+                                                    }</span> <span style="font-size: 0.75em; color: var(--stone-700)">${
+                                                creator.username
+                                            }</span></td>
+                                                    <td>$${creator.boards[slug].earnings.toFixed(2)}</td>
+                                                    <td>${(creator.boards[slug].contribution * 100).toFixed(1)}%</td>
+                                                </tr>`
+                                        )
+                                        .join('')}
+                                </tbody>
+                            </table>
+                        `;
+
+                    return `
+                            ${createTable('All Time', 'alltime', creators)}
+                            ${createTable('Last Month', 'month', creators)}
+                            ${createTable('Last Week', 'week', creators)}
+                        `;
+                };
+                app.innerHTML = render(creators);
+                return true;
+            };
+
+            const success = await init();
+            if (!success) {
+                app.innerHTML += `<form>
+                    <label for="name">Enter your throne username</label>
+                    <input type="text" name="name" />
+                    <button type="submit">Submit</button>
+                </form>`;
+            }
+        </script>
+    </body>
+</html>
