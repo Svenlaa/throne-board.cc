@@ -158,11 +158,23 @@
                 const calculateFromLeaderboard = (leaderboard) => {
                     const totalCents = leaderboard.reduce((sum, item) => sum + item.totalAmountSpentUSD, 0);
                     const me = leaderboard.find((item) => item.gifterUsername.toLowerCase() === displayName);
-                    const contribution = me && totalCents ? me.totalAmountSpentUSD / totalCents : 0;
+                    if (!me) {
+                        return {
+                            earnings: totalCents / 100,
+                            contribution: {
+                                percentage: 0,
+                                amount: 0,
+                            },
+                        };
+                    }
+                    const percentage = me && totalCents ? me.totalAmountSpentUSD / totalCents : 0;
 
                     return {
                         earnings: totalCents / 100,
-                        contribution,
+                        contribution: {
+                            percentage,
+                            amount: me.totalAmountSpentUSD / 100,
+                        },
                     };
                 };
 
@@ -201,11 +213,15 @@
                                                 <tr>
                                                     <td><span>${
                                                         creator.displayName
-                                                    }</span> <span style="font-size: 0.75em; color: var(--stone-700)">${
+                                                    }</span> <a href="https://throne.com/${
+                                                creator.username
+                                            }" style="font-size: 0.75em; --color: var(--stone-700)">${
                                                 creator.username
                                             }</span></td>
                                                     <td>$${creator.boards[slug].earnings.toFixed(2)}</td>
-                                                    <td>${(creator.boards[slug].contribution * 100).toFixed(1)}%</td>
+                                                    <td>$${creator.boards[slug].contribution.amount.toFixed(2)} (${(
+                                                creator.boards[slug].contribution.percentage * 100
+                                            ).toFixed(1)}%)</td>
                                                 </tr>`
                                         )
                                         .join('')}
