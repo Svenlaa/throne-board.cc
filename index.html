@@ -127,10 +127,16 @@
                 return null;
             };
 
+            const isModeCreator = () => {
+                const params = new URLSearchParams(window.location.search);
+                return params.get('mode') === 'creator';
+            };
+
             const init = async () => {
                 const username = getName();
                 if (!username) return false;
 
+                let mode = isModeCreator() ? 'creator' : 'gifter';
                 app.innerHTML += `<p>Got name: ${username}</p>`;
                 const userId = await getUserId(username);
                 if (!userId) {
@@ -141,12 +147,14 @@
 
                 app.innerHTML += `<p>Getting followed creators</p>`;
                 const following = await getFollowedCreators(userId);
+
                 app.innerHTML += `<p>Found ${following.length} creators</p>`;
                 if (following.length === 0) {
                     app.innerHTML += `<p>Let's assume you're one</p>`;
+                    mode = 'creator';
                     following.push(userId);
                 }
-                let creators = await getUsersByIds(following.length ? following : [userId]);
+                let creators = await getUsersByIds(following.length === 0 || mode == 'creator' ? [userId] : following);
 
                 creators = await Promise.all(
                     (creators = creators.map(async (creator) => {
@@ -206,6 +214,7 @@
                         return `<p>Nothing at all</p>`;
                     }
                     const createTable = (title, slug, data) => {
+                        data = data.filter((creator) => creator.boards[slug].contribution.amount > 0);
                         if (!data.length) return '';
                         return `
                             <h2>${title}</h2>
@@ -226,7 +235,7 @@
                                                 creator.displayName
                                             }</a> <a href="?name=${
                                                 creator.username
-                                            }" style="font-size: 0.75em; --color: var(--stone-700)">${
+                                            }&mode=creator" style="font-size: 0.75em; --color: var(--stone-700)">${
                                                 creator.username
                                             }</a></td>
                                                     <td>$${creator.boards[slug].earnings.toFixed(2)}</td>
@@ -249,14 +258,15 @@
                         `;
                 };
                 app.innerHTML = render(creators);
-                if (creators.length === 1 && creators[0].boards.leaderboardAllTime.earnings > 0) {
+                if (mode === 'creator' && creators[0].boards.leaderboardAllTime.earnings > 0) {
                     const renderCreatorTable = (title, slug, creator) => {
                         const gifters = creator.data[slug]
                             .sort((a, b) => b.totalAmountSpentUSD - a.totalAmountSpentUSD)
                             .slice(0, 5);
                         if (!gifters.length) return '';
+                        const totalSpent = gifters.reduce((sum, gifter) => sum + gifter.totalAmountSpentUSD, 0);
                         return `
-                            <h2>${title}</h2>
+                            <h2>${title} ($${(totalSpent / 100).toFixed(2)})</h2>
                             <table>
                                 <thead>
                                     <tr>
