@@ -61,11 +61,17 @@
                     }
                 );
                 const json = await res.json();
-                return json.map((doc) => ({
-                    id: doc.found.name.split('/').pop(),
-                    displayName: doc.found.fields.displayName.stringValue,
-                    username: doc.found.fields.username.stringValue,
-                }));
+                console.log(json);
+                return json
+                    .filter((doc) => doc.found)
+                    .map(
+                        (doc) =>
+                            doc.found && {
+                                id: doc.found.name.split('/').pop(),
+                                displayName: doc.found.fields.displayName.stringValue ?? 'no name',
+                                username: doc.found.fields.username.stringValue ?? '',
+                            }
+                    );
             };
 
             const getFollowedCreators = async (userId) => {
