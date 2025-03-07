@@ -270,7 +270,7 @@
                     const renderCreatorTable = (title, slug, creator) => {
                         const gifters = creator.data[slug]
                             .sort((a, b) => b.totalAmountSpentUSD - a.totalAmountSpentUSD)
-                            .slice(0, 5);
+                            .slice(0, 10);
                         if (!gifters.length) return '';
                         const totalSpent = gifters.reduce((sum, gifter) => sum + gifter.totalAmountSpentUSD, 0);
                         return `
