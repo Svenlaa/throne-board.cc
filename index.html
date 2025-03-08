@@ -68,8 +68,8 @@
                         (doc) =>
                             doc.found && {
                                 id: doc.found.name.split('/').pop(),
-                                displayName: doc.found.fields.displayName.stringValue ?? 'no name',
-                                username: doc.found.fields.username.stringValue ?? '',
+                                displayName: doc.found.fields.displayName?.stringValue ?? 'no name',
+                                username: doc.found.fields.username?.stringValue ?? '',
                             }
                     );
             };
