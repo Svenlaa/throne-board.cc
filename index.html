@@ -265,6 +265,7 @@
 
                 if (mode !== 'creator') {
                     app.innerHTML = render(creators);
+                    app.innerHTML += `<a href="?name=${username}&mode=creator">Switch to creator mode</a>`;
                 }
                 if (mode === 'creator' && creators[0].boards.leaderboardAllTime.earnings > 0) {
                     const renderCreatorTable = (title, slug, creator) => {
