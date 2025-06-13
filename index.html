@@ -145,15 +145,19 @@
                 }
                 app.innerHTML += `<p>Got User ID: ${userId}</p>`;
 
-                app.innerHTML += `<p>Getting followed creators</p>`;
-                const following = await getFollowedCreators(userId);
-
-                app.innerHTML += `<p>Found ${following.length} creators</p>`;
-                if (following.length === 0) {
-                    app.innerHTML += `<p>Let's assume you're one</p>`;
-                    mode = 'creator';
-                    following.push(userId);
+                if (mode === 'gifter') app.innerHTML += `<p>Getting followed creators</p>`;
+                const following = mode === 'gifter' ? await getFollowedCreators(userId) : [];
+                if (mode === 'gifter') {
+                    app.innerHTML += `<p>Found ${following.length} followed creators</p>`;
+                    if (following.length === 0) {
+                        app.innerHTML += `<p>Let's assume you're one</p>`;
+                        mode = 'creator';
+                        following.push(userId);
+                    }
+                } else {
+                    app.innerHTML += `<p>Using creator mode</p>`;
                 }
+
                 let creators = await getUsersByIds(following.length === 0 || mode == 'creator' ? [userId] : following);
 
                 creators = await Promise.all(
