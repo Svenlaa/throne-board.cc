@@ -1,7 +1,5 @@
 # [throne-board.cc](https://throne-board.cc)
 
-## What is it?
-
 Throne has a little leaderboard section, but it's very limited. It only shows the top 3 over any given time, ignoring anyone else. Fortunately they have an endpoint that's **very** open, so you can build a leaderboard yourself.
 
 throne-board.cc gives the API endpoint a slightly better frontend.
