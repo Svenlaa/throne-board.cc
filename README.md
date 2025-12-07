@@ -22,7 +22,7 @@ While an improvement on the existing UX, it can still be improved
 - Improved design
 
 ## How to run?
-It's a static page. You can open index.html in your browser and it `just works`.
+It's a static page. You can open `index.html` in your browser and it just works.
 
 You can also use a server.
 - `npm i -g serve`
