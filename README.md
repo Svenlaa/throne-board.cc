@@ -5,8 +5,11 @@ Throne has a little leaderboard section, but it's very limited. It only shows th
 throne-board.cc gives the API endpoint a slightly better frontend.
 
 ## Technologies used
-- HTML
-- Javascript
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- TanStack React Query
 
 ## What I've learned
 - Building around existing firebase apps
@@ -20,8 +23,10 @@ While an improvement on the existing UX, it can still be improved
 - Improved design
 
 ## How to run?
-It's a static page. You can open `index.html` in your browser and it just works.
+Install dependencies and start the development server.
+- `pnpm install`
+- `pnpm dev`
 
-You can also use a server.
-- `npm i -g serve`
-- `serve -p 3000`
+For a production build:
+- `pnpm build`
+- `pnpm preview`
