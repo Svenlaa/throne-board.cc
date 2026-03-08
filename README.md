@@ -30,3 +30,6 @@ Install dependencies and start the development server.
 For a production build:
 - `pnpm build`
 - `pnpm preview`
+
+## Cloudflare build runtime
+Set `NODE_VERSION=22` in Cloudflare Pages/Workers build environment variables so the build runs on current Node LTS.
