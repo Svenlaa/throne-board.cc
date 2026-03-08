@@ -66,16 +66,16 @@ const App = () => {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
       <main className="mx-auto w-full max-w-6xl p-4 md:p-8">
-        <header className="mb-8 rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+        <header className="mb-8 rounded-xl border border-pink-100 bg-white p-5 shadow-sm">
           <h1 className="inline text-3xl font-bold tracking-tight text-stone-950 md:text-4xl">
-            <a className="no-underline hover:underline" href="https://github.com/Svenlaa/throne-board.cc">
+            <a className="no-underline decoration-pink-300 decoration-2 underline-offset-2 hover:underline" href="https://github.com/Svenlaa/throne-board.cc">
               Throne Board
             </a>
           </h1>
-          <span className="ml-3 font-mono text-sm text-stone-600">fan-made and unofficial</span>
+          <span className="ml-3 font-mono text-sm text-pink-700">fan-made and unofficial</span>
         </header>
 
-        <section className="mb-8 rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+        <section className="mb-8 rounded-xl border border-pink-100 bg-white p-5 shadow-sm">
           {username.length === 0 && (
             <p className="text-stone-700">Enter your Throne username below to load stats.</p>
           )}
@@ -97,7 +97,7 @@ const App = () => {
           {result?.kind === 'found' && result.mode === 'creator' && <CreatorView result={result} />}
         </section>
 
-        <section className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+        <section className="rounded-xl border border-pink-100 bg-white p-5 shadow-sm">
           <form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={onSubmit}>
             <label className="flex-1 text-sm font-medium text-stone-700" htmlFor="name">
               Enter {searchSucceeded ? 'a different' : 'your'} throne username
@@ -134,7 +134,7 @@ const GifterView = ({ creators, username }: { creators: CreatorStats[]; username
     <div className="space-y-8">
       <p className="text-stone-700">
         Gifter stats for{' '}
-        <a className="font-medium" href={`https://throne.com/${username}`} rel="noreferrer" target="_blank">
+        <a className="font-medium text-pink-800 hover:text-pink-900" href={`https://throne.com/${username}`} rel="noreferrer" target="_blank">
           @{username}
         </a>
       </p>
@@ -149,7 +149,7 @@ const GifterView = ({ creators, username }: { creators: CreatorStats[]; username
         return <CreatorContributionTable key={slug} creators={withContribution} slug={slug} title={title} />
       })}
 
-      <a className="text-sm font-medium" href={buildCreatorModeUrl(username)}>
+      <a className="text-sm font-medium text-pink-800 hover:text-pink-900" href={buildCreatorModeUrl(username)}>
         Switch to creator mode
       </a>
     </div>
@@ -165,12 +165,12 @@ const CreatorContributionTable = ({
   slug: BoardSlug
   creators: CreatorStats[]
 }) => (
-  <div className="overflow-hidden rounded-lg border border-stone-200">
-    <h2 className="border-b border-stone-200 bg-stone-100 px-4 py-3 text-lg font-semibold text-stone-900">{title}</h2>
+  <div className="overflow-hidden rounded-lg border border-pink-100">
+    <h2 className="border-b border-pink-200 bg-pink-100 px-4 py-3 text-lg font-semibold text-pink-900">{title}</h2>
     <div className="overflow-x-auto">
       <table className="w-full min-w-[640px] border-collapse text-left text-sm">
         <thead>
-          <tr className="bg-stone-100 text-stone-700">
+          <tr className="bg-pink-50 text-stone-700">
             <th className="px-4 py-3 font-semibold">Creator</th>
             <th className="px-4 py-3 font-semibold">Total Earnings (USD)</th>
             <th className="px-4 py-3 font-semibold">Your Contribution</th>
@@ -178,12 +178,12 @@ const CreatorContributionTable = ({
         </thead>
         <tbody>
           {creators.map((creator) => (
-            <tr key={creator.id} className="border-t border-stone-200 align-top hover:bg-stone-50">
+            <tr key={creator.id} className="border-t border-pink-100 align-top hover:bg-pink-50/50">
               <td className="px-4 py-3">
-                <a href={`https://throne.com/${creator.username}`} rel="noreferrer" target="_blank">
+                <a className="text-pink-800 hover:text-pink-900" href={`https://throne.com/${creator.username}`} rel="noreferrer" target="_blank">
                   {creator.displayName}
                 </a>{' '}
-                <a className="text-xs text-stone-600" href={buildCreatorModeUrl(creator.username)}>
+                <a className="text-xs text-pink-700 hover:text-pink-800" href={buildCreatorModeUrl(creator.username)}>
                   @{creator.username}
                 </a>
               </td>
@@ -211,7 +211,7 @@ const CreatorView = ({ result }: { result: ThroneStatsFound }) => {
     <div className="space-y-8">
       <p className="text-stone-700">
         Creator stats for{' '}
-        <a className="font-medium" href={`https://throne.com/${creator.username}`} rel="noreferrer" target="_blank">
+        <a className="font-medium text-pink-800 hover:text-pink-900" href={`https://throne.com/${creator.username}`} rel="noreferrer" target="_blank">
           {creator.displayName}
         </a>
       </p>
@@ -228,14 +228,14 @@ const CreatorView = ({ result }: { result: ThroneStatsFound }) => {
         const totalSpent = gifters.reduce((sum, gifter) => sum + gifter.totalAmountSpentUSD, 0) / 100
 
         return (
-          <div className="overflow-hidden rounded-lg border border-stone-200" key={slug}>
-            <h2 className="border-b border-stone-200 bg-stone-100 px-4 py-3 text-lg font-semibold text-stone-900">
+          <div className="overflow-hidden rounded-lg border border-pink-100" key={slug}>
+            <h2 className="border-b border-pink-200 bg-pink-100 px-4 py-3 text-lg font-semibold text-pink-900">
               {title} ({formatCurrency(totalSpent)})
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[560px] border-collapse text-left text-sm">
                 <thead>
-                  <tr className="bg-stone-100 text-stone-700">
+                  <tr className="bg-pink-50 text-stone-700">
                     <th className="px-4 py-3 font-semibold">Gifter</th>
                     <th className="px-4 py-3 font-semibold">Amount (USD)</th>
                     <th className="px-4 py-3 font-semibold">Percentage</th>
@@ -244,7 +244,7 @@ const CreatorView = ({ result }: { result: ThroneStatsFound }) => {
                 <tbody>
                   {gifters.map((gifter) => (
                     <tr
-                      className="border-t border-stone-200 align-top hover:bg-stone-50"
+                      className="border-t border-pink-100 align-top hover:bg-pink-50/50"
                       key={`${slug}-${gifter.gifterUsername}`}
                     >
                       <td className="px-4 py-3">{gifter.gifterUsername}</td>
