@@ -102,7 +102,7 @@ const App = () => {
             <label className="flex-1 text-sm font-medium text-stone-700" htmlFor="name">
               Enter {searchSucceeded ? 'a different' : 'your'} throne username
               <input
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-base outline-none ring-stone-400 transition focus:ring-2"
+                className="mt-1 block w-full rounded-md border border-pink-200 bg-pink-50 px-3 py-2 text-base outline-none ring-pink-200 transition focus:border-pink-300 focus:ring-2"
                 id="name"
                 name="name"
                 onChange={(event) => setInputName(event.target.value)}
@@ -111,7 +111,7 @@ const App = () => {
               />
             </label>
             <button
-              className="inline-flex items-center justify-center rounded-md bg-stone-900 px-4 py-2 font-medium text-white transition hover:bg-stone-700"
+              className="inline-flex items-center justify-center rounded-md border border-pink-200 bg-pink-100 px-4 py-2 font-medium text-pink-900 transition hover:bg-pink-200"
               type="submit"
             >
               Submit
